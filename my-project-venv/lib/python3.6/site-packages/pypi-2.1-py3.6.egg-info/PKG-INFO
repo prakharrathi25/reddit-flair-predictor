@@ -1,0 +1,26 @@
+Metadata-Version: 1.1
+Name: pypi
+Version: 2.1
+Summary: PyPI is the Python Package Index at http://pypi.org/
+Home-page: http://wiki.python.org/moin/CheeseShopDev
+Author: Warehouse Maintainers
+Author-email: richard@python.org
+License: UNKNOWN
+Description: 
+        PyPI has a new home at <http://pypi.org/>. Users should need not need to change
+        anything, as the old "www" address should still work. Use of the new
+        address in preference is encouraged.
+        
+        Developers interested in how PyPI works, or in contributing to the project,
+        should visit http://wiki.python.org/moin/CheeseShopDev
+            
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: System Administrators
+Classifier: Natural Language :: English
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Topic :: Software Development :: Libraries

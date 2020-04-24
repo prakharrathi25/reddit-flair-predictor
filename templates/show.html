@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+  <h1> The predicted flair is: {{ result.flair }}</h1>
+  <hr>
+  <br/>
+  <p>Find similar posts here: <a href="https://www.reddit.com/r/india/?f=flair_name%3A%22{{result.flair}}%22">{{result.flair}}</a>  </p>
+  <a href="{{ url_for('index') }}" class="btn btn-default">Back</a>
+</div>
+</div>
+
+{% endblock %}
