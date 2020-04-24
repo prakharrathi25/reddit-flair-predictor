@@ -13,7 +13,7 @@ from scipy import linalg
 from scipy.linalg.lapack import get_lapack_funcs
 
 from .base import LinearModel, _pre_fit
-from ..base import RegressorMixin
+from ..base import RegressorMixin, MultiOutputMixin
 from ..utils import as_float_array, check_array, check_X_y
 from ..model_selection import check_cv
 from ..utils._joblib import Parallel, delayed
@@ -340,7 +340,7 @@ def orthogonal_mp(X, y, n_nonzero_coefs=None, tol=None, precompute=False,
     This implementation is based on Rubinstein, R., Zibulevsky, M. and Elad,
     M., Efficient Implementation of the K-SVD Algorithm using Batch Orthogonal
     Matching Pursuit Technical Report - CS Technion, April 2008.
-    http://www.cs.technion.ac.il/~ronrubin/Publications/KSVD-OMP-v2.pdf
+    https://www.cs.technion.ac.il/~ronrubin/Publications/KSVD-OMP-v2.pdf
 
     """
     X = check_array(X, order='F', copy=copy_X)
@@ -479,7 +479,7 @@ def orthogonal_mp_gram(Gram, Xy, n_nonzero_coefs=None, tol=None,
     This implementation is based on Rubinstein, R., Zibulevsky, M. and Elad,
     M., Efficient Implementation of the K-SVD Algorithm using Batch Orthogonal
     Matching Pursuit Technical Report - CS Technion, April 2008.
-    http://www.cs.technion.ac.il/~ronrubin/Publications/KSVD-OMP-v2.pdf
+    https://www.cs.technion.ac.il/~ronrubin/Publications/KSVD-OMP-v2.pdf
 
     """
     Gram = check_array(Gram, order='F', copy=copy_Gram)
@@ -539,7 +539,7 @@ def orthogonal_mp_gram(Gram, Xy, n_nonzero_coefs=None, tol=None,
         return np.squeeze(coef)
 
 
-class OrthogonalMatchingPursuit(LinearModel, RegressorMixin):
+class OrthogonalMatchingPursuit(LinearModel, RegressorMixin, MultiOutputMixin):
     """Orthogonal Matching Pursuit model (OMP)
 
     Read more in the :ref:`User Guide <omp>`.
@@ -604,7 +604,7 @@ class OrthogonalMatchingPursuit(LinearModel, RegressorMixin):
     This implementation is based on Rubinstein, R., Zibulevsky, M. and Elad,
     M., Efficient Implementation of the K-SVD Algorithm using Batch Orthogonal
     Matching Pursuit Technical Report - CS Technion, April 2008.
-    http://www.cs.technion.ac.il/~ronrubin/Publications/KSVD-OMP-v2.pdf
+    https://www.cs.technion.ac.il/~ronrubin/Publications/KSVD-OMP-v2.pdf
 
     See also
     --------
@@ -681,7 +681,7 @@ def _omp_path_residues(X_train, y_train, X_test, y_test, copy=True,
     """Compute the residues on left-out data for a full LARS path
 
     Parameters
-    -----------
+    ----------
     X_train : array, shape (n_samples, n_features)
         The data to fit the LARS on
 

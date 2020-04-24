@@ -9,8 +9,6 @@ import numpy as np
 from sklearn.utils.testing import assert_array_almost_equal
 from sklearn.utils.testing import assert_equal
 from sklearn.utils.testing import assert_allclose
-from sklearn.utils.testing import SkipTest
-from sklearn.utils.testing import assert_false
 from sklearn.utils.testing import assert_warns_message
 from sklearn.utils.testing import if_safe_multiprocessing_with_blas
 
@@ -77,13 +75,6 @@ def test_fit_transform(norm_comp):
     spca_lasso.fit(Y)
     assert_array_almost_equal(spca_lasso.components_, spca_lars.components_)
 
-    # Test that deprecated ridge_alpha parameter throws warning
-    warning_msg = "The ridge_alpha parameter on transform()"
-    assert_warns_message(DeprecationWarning, warning_msg, spca_lars.transform,
-                         Y, ridge_alpha=0.01)
-    assert_warns_message(DeprecationWarning, warning_msg, spca_lars.transform,
-                         Y, ridge_alpha=None)
-
 
 @pytest.mark.filterwarnings("ignore:normalize_components")
 @pytest.mark.parametrize("norm_comp", [False, True])
@@ -113,7 +104,7 @@ def test_transform_nan(norm_comp):
     Y, _, _ = generate_toy_data(3, 10, (8, 8), random_state=rng)  # wide array
     Y[:, 0] = 0
     estimator = SparsePCA(n_components=8, normalize_components=norm_comp)
-    assert_false(np.any(np.isnan(estimator.fit_transform(Y))))
+    assert not np.any(np.isnan(estimator.fit_transform(Y)))
 
 
 @pytest.mark.filterwarnings("ignore:normalize_components")
@@ -164,10 +155,11 @@ def test_mini_batch_correct_shapes(norm_comp):
     assert_equal(U.shape, (12, 13))
 
 
+# XXX: test always skipped
+@pytest.mark.skipif(True, reason="skipping mini_batch_fit_transform.")
 @pytest.mark.filterwarnings("ignore:normalize_components")
 @pytest.mark.parametrize("norm_comp", [False, True])
 def test_mini_batch_fit_transform(norm_comp):
-    raise SkipTest("skipping mini_batch_fit_transform.")
     alpha = 1
     rng = np.random.RandomState(0)
     Y, _, _ = generate_toy_data(3, 10, (8, 8), random_state=rng)  # wide array

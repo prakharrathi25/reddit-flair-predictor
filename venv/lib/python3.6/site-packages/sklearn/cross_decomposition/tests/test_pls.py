@@ -1,3 +1,4 @@
+import pytest
 import numpy as np
 from numpy.testing import assert_approx_equal
 
@@ -357,13 +358,13 @@ def test_scale_and_stability():
             X_score, Y_score = clf.fit_transform(X, Y)
             clf.set_params(scale=False)
             X_s_score, Y_s_score = clf.fit_transform(X_s, Y_s)
-            assert_array_almost_equal(X_s_score, X_score)
-            assert_array_almost_equal(Y_s_score, Y_score)
+            assert_array_almost_equal(X_s_score, X_score, decimal=4)
+            assert_array_almost_equal(Y_s_score, Y_score, decimal=4)
             # Scaling should be idempotent
             clf.set_params(scale=True)
             X_score, Y_score = clf.fit_transform(X_s, Y_s)
-            assert_array_almost_equal(X_s_score, X_score)
-            assert_array_almost_equal(Y_s_score, Y_score)
+            assert_array_almost_equal(X_s_score, X_score, decimal=4)
+            assert_array_almost_equal(Y_s_score, Y_score, decimal=4)
 
 
 def test_pls_errors():
@@ -377,6 +378,7 @@ def test_pls_errors():
                              clf.fit, X, Y)
 
 
+@pytest.mark.filterwarnings('ignore: The default value of multioutput')  # 0.23
 def test_pls_scaling():
     # sanity check for scale=True
     n_samples = 1000

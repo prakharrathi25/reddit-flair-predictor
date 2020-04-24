@@ -1,16 +1,15 @@
 from itertools import chain, product
 import warnings
+import string
+import timeit
 
 import pytest
 import numpy as np
 import scipy.sparse as sp
-from scipy.linalg import pinv2
-from scipy.sparse.csgraph import laplacian
 
 from sklearn.utils.testing import (assert_equal, assert_raises,
-                                   assert_almost_equal, assert_array_equal,
+                                   assert_array_equal,
                                    SkipTest, assert_raises_regex,
-                                   assert_greater_equal, ignore_warnings,
                                    assert_warns_message, assert_no_warnings)
 from sklearn.utils import check_random_state
 from sklearn.utils import deprecated
@@ -20,10 +19,9 @@ from sklearn.utils import column_or_1d
 from sklearn.utils import safe_indexing
 from sklearn.utils import shuffle
 from sklearn.utils import gen_even_slices
+from sklearn.utils import _message_with_time, _print_elapsed_time
 from sklearn.utils import get_chunk_n_rows
 from sklearn.utils import is_scalar_nan
-from sklearn.utils.extmath import pinvh
-from sklearn.utils.arpack import eigsh
 from sklearn.utils.mocking import MockDataFrame
 from sklearn import config_context
 
@@ -70,7 +68,7 @@ def test_deprecated():
         warnings.simplefilter("always")
 
         @deprecated("don't use this")
-        class Ham(object):
+        class Ham:
             SPAM = 1
 
         ham = Ham()
@@ -95,6 +93,67 @@ def test_resample():
     assert_equal(len(resample([1, 2], n_samples=5)), 5)
 
 
+def test_resample_stratified():
+    # Make sure resample can stratify
+    rng = np.random.RandomState(0)
+    n_samples = 100
+    p = .9
+    X = rng.normal(size=(n_samples, 1))
+    y = rng.binomial(1, p, size=n_samples)
+
+    _, y_not_stratified = resample(X, y, n_samples=10, random_state=0,
+                                   stratify=None)
+    assert np.all(y_not_stratified == 1)
+
+    _, y_stratified = resample(X, y, n_samples=10, random_state=0, stratify=y)
+    assert not np.all(y_stratified == 1)
+    assert np.sum(y_stratified) == 9  # all 1s, one 0
+
+
+def test_resample_stratified_replace():
+    # Make sure stratified resampling supports the replace parameter
+    rng = np.random.RandomState(0)
+    n_samples = 100
+    X = rng.normal(size=(n_samples, 1))
+    y = rng.randint(0, 2, size=n_samples)
+
+    X_replace, _ = resample(X, y, replace=True, n_samples=50,
+                            random_state=rng, stratify=y)
+    X_no_replace, _ = resample(X, y, replace=False, n_samples=50,
+                               random_state=rng, stratify=y)
+    assert np.unique(X_replace).shape[0] < 50
+    assert np.unique(X_no_replace).shape[0] == 50
+
+    # make sure n_samples can be greater than X.shape[0] if we sample with
+    # replacement
+    X_replace, _ = resample(X, y, replace=True, n_samples=1000,
+                            random_state=rng, stratify=y)
+    assert X_replace.shape[0] == 1000
+    assert np.unique(X_replace).shape[0] == 100
+
+
+def test_resample_stratify_2dy():
+    # Make sure y can be 2d when stratifying
+    rng = np.random.RandomState(0)
+    n_samples = 100
+    X = rng.normal(size=(n_samples, 1))
+    y = rng.randint(0, 2, size=(n_samples, 2))
+    X, y = resample(X, y, n_samples=50, random_state=rng, stratify=y)
+    assert y.ndim == 2
+
+
+def test_resample_stratify_sparse_error():
+    # resample must be ndarray
+    rng = np.random.RandomState(0)
+    n_samples = 100
+    X = rng.normal(size=(n_samples, 2))
+    y = rng.randint(0, 2, size=n_samples)
+    stratify = sp.csr_matrix(y)
+    with pytest.raises(TypeError, match='A sparse matrix was passed'):
+        X, y = resample(X, y, n_samples=50, random_state=rng,
+                        stratify=stratify)
+
+
 def test_safe_mask():
     random_state = check_random_state(0)
     X = random_state.rand(5, 4)
@@ -106,56 +165,6 @@ def test_safe_mask():
 
     mask = safe_mask(X_csr, mask)
     assert_equal(X_csr[mask].shape[0], 3)
-
-
-@ignore_warnings  # Test deprecated backport to be removed in 0.21
-def test_pinvh_simple_real():
-    a = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 10]], dtype=np.float64)
-    a = np.dot(a, a.T)
-    a_pinv = pinvh(a)
-    assert_almost_equal(np.dot(a, a_pinv), np.eye(3))
-
-
-@ignore_warnings  # Test deprecated backport to be removed in 0.21
-def test_pinvh_nonpositive():
-    a = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]], dtype=np.float64)
-    a = np.dot(a, a.T)
-    u, s, vt = np.linalg.svd(a)
-    s[0] *= -1
-    a = np.dot(u * s, vt)  # a is now symmetric non-positive and singular
-    a_pinv = pinv2(a)
-    a_pinvh = pinvh(a)
-    assert_almost_equal(a_pinv, a_pinvh)
-
-
-@ignore_warnings  # Test deprecated backport to be removed in 0.21
-def test_pinvh_simple_complex():
-    a = (np.array([[1, 2, 3], [4, 5, 6], [7, 8, 10]])
-         + 1j * np.array([[10, 8, 7], [6, 5, 4], [3, 2, 1]]))
-    a = np.dot(a, a.conj().T)
-    a_pinv = pinvh(a)
-    assert_almost_equal(np.dot(a, a_pinv), np.eye(3))
-
-
-@ignore_warnings  # Test deprecated backport to be removed in 0.21
-def test_arpack_eigsh_initialization():
-    # Non-regression test that shows null-space computation is better with
-    # initialization of eigsh from [-1,1] instead of [0,1]
-    random_state = check_random_state(42)
-
-    A = random_state.rand(50, 50)
-    A = np.dot(A.T, A)  # create s.p.d. matrix
-    A = laplacian(A) + 1e-7 * np.identity(A.shape[0])
-    k = 5
-
-    # Test if eigsh is working correctly
-    # New initialization [-1,1] (as in original ARPACK)
-    # Was [0,1] before, with which this test could fail
-    v0 = random_state.uniform(-1, 1, A.shape[0])
-    w, _ = eigsh(A, k=k, sigma=0.0, v0=v0)
-
-    # Eigenvalues of s.p.d. matrix should be nonnegative, w[0] is smallest
-    assert_greater_equal(w[0], 0)
 
 
 def test_column_or_1d():
@@ -315,6 +324,62 @@ def test_get_chunk_n_rows(row_bytes, max_n_rows, working_memory,
                                max_n_rows=max_n_rows)
         assert actual == expected
         assert type(actual) is type(expected)
+
+
+@pytest.mark.parametrize(
+    ['source', 'message', 'is_long'],
+    [
+        ('ABC', string.ascii_lowercase, False),
+        ('ABCDEF', string.ascii_lowercase, False),
+        ('ABC', string.ascii_lowercase * 3, True),
+        ('ABC' * 10, string.ascii_lowercase, True),
+        ('ABC', string.ascii_lowercase + u'\u1048', False),
+    ])
+@pytest.mark.parametrize(
+    ['time', 'time_str'],
+    [
+        (0.2, '   0.2s'),
+        (20, '  20.0s'),
+        (2000, '33.3min'),
+        (20000, '333.3min'),
+    ])
+def test_message_with_time(source, message, is_long, time, time_str):
+    out = _message_with_time(source, message, time)
+    if is_long:
+        assert len(out) > 70
+    else:
+        assert len(out) == 70
+
+    assert out.startswith('[' + source + '] ')
+    out = out[len(source) + 3:]
+
+    assert out.endswith(time_str)
+    out = out[:-len(time_str)]
+    assert out.endswith(', total=')
+    out = out[:-len(', total=')]
+    assert out.endswith(message)
+    out = out[:-len(message)]
+    assert out.endswith(' ')
+    out = out[:-1]
+
+    if is_long:
+        assert not out
+    else:
+        assert list(set(out)) == ['.']
+
+
+@pytest.mark.parametrize(
+    ['message', 'expected'],
+    [
+        ('hello', _message_with_time('ABC', 'hello', 0.1) + '\n'),
+        ('', _message_with_time('ABC', '', 0.1) + '\n'),
+        (None, ''),
+    ])
+def test_print_elapsed_time(message, expected, capsys, monkeypatch):
+    monkeypatch.setattr(timeit, 'default_timer', lambda: 0)
+    with _print_elapsed_time('ABC', message):
+        monkeypatch.setattr(timeit, 'default_timer', lambda: 0.1)
+    assert capsys.readouterr().out == expected
 
 
 @pytest.mark.parametrize("value, result", [(float("nan"), True),
