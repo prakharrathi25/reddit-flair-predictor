@@ -8,9 +8,10 @@ A flair is a 'tag' that can be added to threads posted on the reddit website wit
 
 This is a web-app that I created which predicts which flair should be alloted to a post. You have to post the link of the reddit post in the search bar. Find the webapp [here](https://flair-prediction-app.herokuapp.com/)
 
-
+The automated testing file can be found [here](https://automated-testing-endpoint.herokuapp.com/)
 ## Directory Structure 
-I have made a flask app which is hosted on Heroku 
+I have made a flask app which is hosted on Heroku. The structure of the directory can be found here. 
+
 
 ## References
 
