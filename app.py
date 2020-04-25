@@ -13,10 +13,11 @@ Bootstrap(app) # Pass app into the bootstrap Class to use Bootstrap functions
 
 # Import our model
 model = joblib.load('final_model.sav')
+
 '''
 ROUTES
 '''
-# Route when we recieve a GET or POST request
+# Route when we recieve a GET or POST request from the index page
 @app.route('/', methods=['POST', 'GET'])
 def index():
 
@@ -51,7 +52,6 @@ def index():
             'flair': flair_type,
             }
         return render_template('show.html', result=result)
-
 
 if __name__ == '__main__':
     app.run(debug=True)

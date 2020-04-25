@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+  <h1> Download the predictions json file here</h1>
+  <hr>
+  <br/>
+  <a href="/static/predictions.json" class="btn btn-default" download> Download </a>  
+  <a href="{{ url_for('index') }}" class="btn btn-default">Back</a>
+</div>
+</div>
+
+{% endblock %}
