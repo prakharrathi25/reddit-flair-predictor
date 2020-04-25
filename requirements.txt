@@ -7,7 +7,7 @@ Django==2.1.5
 gunicorn==19.9.0
 idna==2.8
 lxml==4.3.1
-nltk==3.4
+nltk==3.4.5
 numpy==1.16.1
 praw==6.1.1
 prawcore==1.0.1
