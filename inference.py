@@ -28,7 +28,11 @@ REPLACE_SPACES = re.compile('[/(){}\[\]\|@,;]')
 BAD_SYMBOLS = re.compile('[^0-9a-z #+_]')
 
 def clean_text(text):
-
+    """
+    :param text: the text to be cleaned
+    
+    :returns text: clean text
+    """
     text = text.lower() # lowercase text
     text = REPLACE_SPACES.sub(' ', text)
     text = BAD_SYMBOLS.sub('', text) # Replace Bad Symbols which
