@@ -4,12 +4,12 @@
 
 **What are Reddit Flairs?**
 
-A flair is a 'tag' that can be added to threads posted on the reddit website within a sub-reddit. They help users understand the category to which the posts they are scrolling through, belong and thus, help them filter out specific posts based on their preferences.
+A flair is a 'tag' that can be appended to threads posted on the reddit website within a sub-reddit. They facilitate the users in understanding the category to which the posts they are scrolling through, belong and thus, help them filter out specific posts based on their inclinations and preferences.
 
-This is a web-app that I created that performs the task of predicting which flair should be alloted to a post. As a user, you just need to paste the link of the reddit post in the search bar. Find the webapp [here](https://flair-prediction-app.herokuapp.com/)
+This is a web-app that I constructed that performs the task of predicting which flair should be alloted to a post. As a user, you are just re quired to paste the link of the reddit post in the search bar. Find the webapp [here](https://flair-prediction-app.herokuapp.com/)
 
 ### Automated Testing 
-The automated testing file can be found [here](https://automated-testing-endpoint.herokuapp.com/). You have to upload a .txt file followed by downloading a .json file with the required predictions. 
+The automated testing file can be identified [here](https://automated-testing-endpoint.herokuapp.com/). You have to upload a .txt file followed by downloading a .json file with the required predictions. 
 
 ## Directory Structure 
 
