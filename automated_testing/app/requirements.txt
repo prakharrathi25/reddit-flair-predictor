@@ -7,7 +7,7 @@ gunicorn==19.9.0
 idna==2.8
 lxml==4.6.3
 nltk==3.4.5
-numpy==1.16.1
+numpy==1.22.0
 praw==6.1.1
 prawcore==1.0.1
 pandas==0.25.0
