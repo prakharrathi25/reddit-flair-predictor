@@ -26,4 +26,3 @@ I have made a flask app which is hosted on Heroku. The structure of the director
 ## References
 
 https://towardsdatascience.com/scraping-reddit-data-1c0af3040768
-
